@@ -32,6 +32,23 @@ Installation
 
    http://localhost:5173
 
+Docker
+------
+
+- Construire et lancer avec Docker:
+
+  docker build -t xtream-viewer .
+  docker run --rm -it -p 5173:5173 --name xtream-viewer -e PORT=5173 xtream-viewer
+
+- Ou via Docker Compose:
+
+  docker compose up --build
+
+Ensuite ouvrez: http://localhost:5173
+
+Variables d’environnement:
+- `PORT` (par défaut 5173) : port d’écoute dans le conteneur.
+
 Utilisation
 -----------
 
@@ -54,4 +71,3 @@ Sécurité
 
 - Les identifiants sont envoyés au backend à chaque requête (pas de session côté serveur, simplification locale). Ne déployez pas tel quel sur Internet.
 - Évitez d’exposer ce serveur publiquement sans ajout d’authentification et de chiffrement (HTTPS, sessions, rate-limit, logs réduits).
-
