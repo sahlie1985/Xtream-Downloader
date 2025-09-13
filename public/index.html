@@ -26,6 +26,7 @@
           </select>
         </label>
         <button id="connectBtn">Se connecter</button>
+        <button id="clearBtn" class="btn-danger" title="Supprimer les données mémorisées (identifiants, préférences)">Effacer données</button>
       </div>
     </header>
 
@@ -68,6 +69,20 @@
   <footer>
       <small>Astuce: si le lien direct ne s'ouvre pas dans VLC, utilisez le bouton "M3U" pour télécharger un fichier .m3u à ouvrir avec VLC.</small>
   </footer>
+
+    <!-- Image preview modal -->
+    <div id="imgModal" class="img-modal hidden" aria-hidden="true" role="dialog" aria-label="Aperçu image">
+      <div class="img-backdrop" id="imgBackdrop"></div>
+      <figure class="img-box">
+        <img id="imgPreview" alt="Aperçu" referrerpolicy="no-referrer" />
+        <figcaption id="imgCaption"></figcaption>
+        <div class="img-actions">
+          <a id="imgOpen" target="_blank" rel="noopener">Ouvrir l'image</a>
+          <button id="imgClose" class="btn-danger">Fermer</button>
+        </div>
+      </figure>
+    </div>
+
     <script src="/app.js" type="module"></script>
   </body>
   </html>

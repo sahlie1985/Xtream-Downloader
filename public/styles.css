@@ -8,6 +8,8 @@ label{ display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(-
 input,select,button{ height:36px; padding:6px 8px; border:1px solid var(--border); background:#11131a; color:var(--fg); border-radius:6px }
 button{ background:var(--accent); color:#00151f; border:0; font-weight:600; cursor:pointer }
 button:hover{ filter:brightness(1.05) }
+.btn-danger{ background:#ff6b6b; color:#2b0b0b }
+.btn-danger:hover{ filter:brightness(1.05) }
 .panel{ padding:12px 16px; border-bottom:1px solid var(--border) }
 .info{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px; margin:8px 0 }
 .info div{ background:var(--card); padding:8px; border-radius:8px; border:1px solid var(--border) }
@@ -48,8 +50,18 @@ section{ padding:12px; overflow:auto }
 .card{ background:var(--card); border:1px solid var(--border); padding:8px; border-radius:8px; display:flex; gap:8px }
 .thumb{ width:60px; height:60px; background:#0d0f15; border:1px solid var(--border); border-radius:6px; flex:0 0 60px; overflow:hidden; display:flex; align-items:center; justify-content:center }
 .thumb img{ width:100%; height:100%; object-fit:cover }
+.thumb.clickable{ cursor: zoom-in }
 .meta{ display:flex; flex-direction:column; gap:6px; flex:1 }
 .name{ font-weight:600 }
 .actions{ display:flex; gap:6px; flex-wrap:wrap }
 .hidden{ display:none }
 footer{ padding:8px 16px; color:var(--muted); border-top:1px solid var(--border) }
+
+/* Image modal */
+.img-modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:50 }
+.img-modal.hidden{ display:none }
+.img-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.6); backdrop-filter: blur(1px) }
+.img-box{ position:relative; max-width:92vw; max-height:88vh; margin:0; padding:12px; background:#0f1115; border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; gap:10px; z-index:1 }
+.img-box img{ max-width:88vw; max-height:72vh; border-radius:8px; border:1px solid var(--border); background:#000 }
+.img-box figcaption{ color:var(--muted); font-size:12px }
+.img-actions{ display:flex; gap:8px; justify-content:flex-end }

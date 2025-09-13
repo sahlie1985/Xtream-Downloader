@@ -71,12 +71,35 @@ async function api(path, body) {
   return res.json();
 }
 
+function formatMaybeDate(key, value) {
+  const k = String(key).toLowerCase();
+  const raw = value;
+  const n = Number(value);
+  const looksNumeric = Number.isFinite(n);
+  const isDateKey = /(^|_)(exp|created|updated|start|end|date|time|timestamp)(_at)?$/.test(k) || k.endsWith("_at") || k.includes("date") || k.includes("timestamp");
+  if (isDateKey && looksNumeric) {
+    // Detect seconds vs milliseconds
+    const ms = n < 1e12 ? n * 1000 : n;
+    const d = new Date(ms);
+    if (!isNaN(d.getTime())) {
+      // Locale-aware date time
+      return d.toLocaleString(undefined, {
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+      });
+    }
+  }
+  return raw;
+}
+
 function renderKV(container, obj) {
   container.innerHTML = "";
   if (!obj) return;
   for (const [k, v] of Object.entries(obj)) {
     const d = document.createElement("div");
-    d.textContent = `${k}: ${v}`;
+    const formatted = formatMaybeDate(k, v);
+    d.textContent = `${k}: ${formatted}`;
+    if (formatted !== v) d.title = String(v);
     container.appendChild(d);
   }
 }
@@ -194,7 +217,7 @@ function renderCategories(cats) {
   }
 }
 
-function cardThumb(url) {
+function cardThumb(url, title) {
   const div = document.createElement("div");
   div.className = "thumb";
   if (url) {
@@ -202,6 +225,12 @@ function cardThumb(url) {
     img.src = url;
     img.referrerPolicy = "no-referrer"; // some panels block hotlinking
     div.appendChild(img);
+    div.classList.add("clickable");
+    div.title = "Agrandir l'image";
+    div.onclick = (e) => {
+      e.stopPropagation();
+      openImageModal(url, title || "");
+    };
   } else {
     div.textContent = "📺";
   }
@@ -216,7 +245,7 @@ function renderItems(items, kindOverride) {
     card.className = "card";
 
     const logo = it.stream_icon || it.cover || "";
-    card.appendChild(cardThumb(logo));
+    card.appendChild(cardThumb(logo, getItemName(it)));
 
     const meta = document.createElement("div");
     meta.className = "meta";
@@ -313,6 +342,7 @@ byId("dlAll").onclick = () => downloadM3U("all");
 byId("dlLive").onclick = () => downloadM3U("live");
 byId("dlVod").onclick = () => downloadM3U("vod");
 byId("dlEpg").onclick = () => downloadEPG();
+byId("clearBtn").onclick = () => clearStored();
 
 document.querySelectorAll("nav button").forEach(btn => {
   btn.onclick = () => loadTab(btn.dataset.tab);
@@ -397,7 +427,68 @@ async function loadSearchAll() {
   }
 }
 
+function clearStored() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  // Reset state
+  state.baseUrl = "";
+  state.username = "";
+  state.password = "";
+  state.output = "mpegts";
+  state.tab = "live";
+  state.currentCategory = null;
+  state.selectedCatByTab = { live: null, vod: null, series: null };
+  state.search = "";
+  state.searchAll = false;
+  state.currentItems = [];
+  state.currentKind = "live";
+  // Reset UI fields
+  const baseUrlEl2 = byId("baseUrl"); if (baseUrlEl2) baseUrlEl2.value = "";
+  const usernameEl2 = byId("username"); if (usernameEl2) usernameEl2.value = "";
+  const passwordEl2 = byId("password"); if (passwordEl2) passwordEl2.value = "";
+  const outputEl2 = byId("output"); if (outputEl2) outputEl2.value = "mpegts";
+  const searchInputEl2 = byId("searchInput"); if (searchInputEl2) searchInputEl2.value = "";
+  const searchAllEl2 = byId("searchAll"); if (searchAllEl2) searchAllEl2.checked = false;
+  // Clear content and hide panels
+  byId("userInfo").innerHTML = "";
+  byId("serverInfo").innerHTML = "";
+  byId("categories").innerHTML = "";
+  byId("items").innerHTML = "";
+  setVisible(byId("account"), false);
+  setVisible(byId("tabs"), false);
+  setVisible(byId("searchBar"), false);
+  setVisible(byId("content"), false);
+  alert("Données locales supprimées.");
+}
+
 // Auto-connect if we already have creds
 if (state.baseUrl && state.username && state.password) {
   connect();
 }
+
+// Image modal logic
+const imgModal = byId("imgModal");
+const imgBackdrop = byId("imgBackdrop");
+const imgPreview = byId("imgPreview");
+const imgCaption = byId("imgCaption");
+const imgClose = byId("imgClose");
+const imgOpen = byId("imgOpen");
+
+function openImageModal(url, title) {
+  if (!url) return;
+  imgPreview.src = url;
+  imgPreview.alt = title || "Image";
+  imgCaption.textContent = title || "";
+  imgOpen.href = url;
+  setVisible(imgModal, true);
+  imgModal.setAttribute("aria-hidden", "false");
+}
+function closeImageModal() {
+  imgPreview.src = "";
+  setVisible(imgModal, false);
+  imgModal.setAttribute("aria-hidden", "true");
+}
+imgBackdrop?.addEventListener("click", closeImageModal);
+imgClose?.addEventListener("click", closeImageModal);
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !imgModal.classList.contains("hidden")) closeImageModal();
+});
