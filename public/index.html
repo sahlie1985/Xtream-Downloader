@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Xtream Viewer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Xtream Viewer</h1>
+      <div class="creds">
+        <label>Serveur (ex: http://host:port)
+          <input id="baseUrl" placeholder="http://host:port" />
+        </label>
+        <label>Utilisateur
+          <input id="username" />
+        </label>
+        <label>Mot de passe
+          <input id="password" type="password" />
+        </label>
+        <label>Lecture
+          <select id="output">
+            <option value="mpegts">MPEG-TS (.ts)</option>
+            <option value="hls">HLS (.m3u8)</option>
+          </select>
+        </label>
+        <button id="connectBtn">Se connecter</button>
+      </div>
+    </header>
+
+    <section id="account" class="panel hidden">
+      <h2>Compte & Serveur</h2>
+      <div id="userInfo" class="info"></div>
+      <div id="serverInfo" class="info"></div>
+      <div class="downloads">
+        <button id="dlAll">Télécharger M3U (Tout)</button>
+        <button id="dlLive">Télécharger M3U (Live)</button>
+        <button id="dlVod">Télécharger M3U (VOD)</button>
+        <button id="dlEpg">Télécharger EPG (XMLTV)</button>
+      </div>
+    </section>
+
+  <nav id="tabs" class="hidden">
+      <button data-tab="live" class="active">Live</button>
+      <button data-tab="vod">VOD</button>
+      <button data-tab="series">Séries</button>
+  </nav>
+
+    <div id="searchBar" class="hidden">
+      <input id="searchInput" placeholder="Rechercher une chaîne / vidéo..." />
+      <label class="inline">
+        <input id="searchAll" type="checkbox" /> Toutes catégories
+      </label>
+    </div>
+
+    <main class="grid hidden" id="content">
+      <aside>
+        <h3 id="catTitle">Catégories</h3>
+        <div id="categories"></div>
+      </aside>
+      <section>
+        <h3 id="itemsTitle">Éléments</h3>
+        <div id="items" class="cards"></div>
+      </section>
+    </main>
+
+  <footer>
+      <small>Astuce: si le lien direct ne s'ouvre pas dans VLC, utilisez le bouton "M3U" pour télécharger un fichier .m3u à ouvrir avec VLC.</small>
+  </footer>
+    <script src="/app.js" type="module"></script>
+  </body>
+  </html>
