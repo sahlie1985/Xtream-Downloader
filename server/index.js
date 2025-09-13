@@ -6,6 +6,8 @@ import { fileURLToPath } from "url";
 import xt from "./xtream.js";
 import fetch from "node-fetch";
 import { URL as NodeURL } from "url";
+import { spawn } from "child_process";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +37,11 @@ app.post("/api/account", async (req, res, next) => {
     const data = await xt.getAccountInfo(creds);
     res.json({ user_info: data.user_info, server_info: data.server_info });
   } catch (e) { next(e); }
+});
+
+// Environment info (used by frontend to enable desktop features)
+app.get("/api/env", (req, res) => {
+  res.json({ desktop: process.env.IS_DESKTOP === "1" });
 });
 
 app.post("/api/live/categories", async (req, res, next) => {
@@ -210,6 +217,49 @@ app.get("/api/proxy/hls", async (req, res, next) => {
     res.status(upstream.status);
     upstream.body.pipe(res);
   } catch (e) { next(e); }
+});
+
+// Desktop-only: open a stream in VLC
+app.post("/api/open/vlc", async (req, res, next) => {
+  try {
+    if (process.env.IS_DESKTOP !== "1") {
+      const err = new Error("VLC launch is only available in desktop mode");
+      err.status = 400; throw err;
+    }
+    const { url, extraArgs = [], path: providedPath } = req.body || {};
+    if (!url) { const err = new Error("Missing url"); err.status = 400; throw err; }
+
+    const exists = (p) => { try { fs.accessSync(p, fs.constants.F_OK); return true; } catch { return false; } };
+    // Try provided env var or body path first
+    let vlcPath = process.env.VLC_PATH || providedPath || null;
+    if (vlcPath && !exists(vlcPath)) vlcPath = null;
+
+    if (!vlcPath) {
+      const candidates = process.platform === 'win32'
+        ? [
+            'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe',
+            'C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe',
+          ]
+        : process.platform === 'darwin'
+        ? ['/Applications/VLC.app/Contents/MacOS/VLC']
+        : ['/usr/bin/vlc', '/usr/local/bin/vlc'];
+      vlcPath = candidates.find(exists) || 'vlc'; // fallback to PATH
+    }
+
+    const args = Array.isArray(extraArgs) ? [...extraArgs, url] : [url];
+    const child = spawn(vlcPath, args, { detached: true, stdio: 'ignore' });
+    await new Promise((resolve, reject) => {
+      let resolved = false;
+      child.once('error', reject);
+      child.once('spawn', () => { resolved = true; resolve(); });
+      setTimeout(() => { if (!resolved) resolve(); }, 500);
+    });
+    child.unref();
+    res.json({ ok: true, launched: true, cmd: vlcPath });
+  } catch (e) {
+    e.status = e.status || 500;
+    res.status(e.status).json({ error: e.message || String(e) });
+  }
 });
 
 // Serve static frontend

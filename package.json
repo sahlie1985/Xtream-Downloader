@@ -18,8 +18,10 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "electron": "^30.0.0",
-    "electron-builder": "^24.6.0"
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3",
+    "install": "^0.13.0",
+    "npm": "^11.6.0"
   },
   "main": "electron/main.js",
   "build": {
@@ -37,7 +39,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },

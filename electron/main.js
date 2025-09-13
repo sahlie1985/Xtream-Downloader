@@ -12,6 +12,8 @@ let serverStarted = false;
 async function startServer() {
   if (serverStarted) return;
   // Start the Express server in-process
+  // Tag the process so backend knows it's desktop-mode
+  process.env.IS_DESKTOP = '1';
   await import('../server/index.js');
   serverStarted = true;
 }
@@ -73,4 +75,3 @@ if (!gotLock) {
     }
   });
 }
-

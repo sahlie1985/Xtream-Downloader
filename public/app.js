@@ -17,6 +17,8 @@ const state = {
   demo: false,
   userInfoObj: null,
   serverInfoObj: null,
+  isDesktop: false,
+  vlcPath: null,
 };
 
 function saveState() {
@@ -149,6 +151,11 @@ async function connect() {
     return;
   }
   try {
+    // detect desktop mode once
+    try {
+      const env = await fetch('/api/env').then(r => r.ok ? r.json() : { desktop: false }).catch(() => ({ desktop: false }));
+      state.isDesktop = !!env.desktop;
+    } catch {}
     const { user_info, server_info } = await api("/api/account", creds());
     state.userInfoObj = user_info;
     state.serverInfoObj = server_info;
@@ -307,12 +314,42 @@ function renderItems(items, kindOverride) {
     };
 
     const openBtn = document.createElement("a");
-    openBtn.textContent = "Ouvrir";
+    openBtn.textContent = state.isDesktop ? "Ouvrir (VLC)" : "Ouvrir";
     openBtn.href = "#";
     openBtn.onclick = async (e) => {
       e.preventDefault();
       const { url, vlc } = await api("/api/stream/url", { ...creds(), id: it.stream_id || it.series_id || it.id, kind: kindOverride || "live", format: byId("output").value });
-      // Try vlc:// first, else fall back to direct url (browser may not play .ts)
+      if (state.isDesktop) {
+        // Ask backend to spawn VLC locally (desktop mode only)
+        try {
+          const payload = { url };
+          if (state.vlcPath) payload.path = state.vlcPath;
+          const res = await fetch('/api/open/vlc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          if (!res.ok) throw new Error(await res.text());
+          openBtn.textContent = 'Envoyé à VLC'; setTimeout(() => openBtn.textContent = 'Ouvrir (VLC)', 1500);
+          return;
+        } catch (err) {
+          const msg = String(err?.message || 'inconnu');
+          // If VLC not found, ask user for path
+          if (/ENOENT|not found|spawn vlc/i.test(msg)) {
+            const p = prompt('Chemin de VLC (vlc.exe) ? Ex: C\\\Program Files\\VideoLAN\\VLC\\vlc.exe');
+            if (p) {
+              state.vlcPath = p.trim();
+              try {
+                const res2 = await fetch('/api/open/vlc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url, path: state.vlcPath }) });
+                if (!res2.ok) throw new Error(await res2.text());
+                openBtn.textContent = 'Envoyé à VLC'; setTimeout(() => openBtn.textContent = 'Ouvrir (VLC)', 1500);
+                return;
+              } catch (e2) {
+                alert('Echec VLC: ' + (e2?.message || 'inconnu'));
+              }
+            }
+          } else {
+            alert('VLC non lancé: ' + msg);
+          }
+        }
+      }
+      // Fallback browser behavior
       try { window.location.href = vlc; } catch {}
       setTimeout(() => { window.open(url, "_blank"); }, 200);
     };

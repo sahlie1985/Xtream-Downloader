@@ -76,6 +76,29 @@ Icônes & Favicons
 - Icône Windows (Electron): placez une image `PNG` 512×512 dans `build/icon.png`.
   - Un placeholder est généré automatiquement à l’installation (`postinstall`). Remplacez‑le par votre logo pour un rendu propre (installateur et raccourcis).
 
+Lecture dans VLC (version desktop)
+----------------------------------
+
+L’intégration “Ouvrir (VLC)” fonctionne uniquement dans l’application desktop (Electron). Navigateur web: les navigateurs bloquent le lancement de programmes locaux.
+
+Prérequis
+- Installer VLC sur votre poste.
+- Chemins courants sous Windows:
+  - `C:\Program Files\VideoLAN\VLC\vlc.exe`
+  - `C:\Program Files (x86)\VideoLAN\VLC\vlc.exe`
+
+Comment ça marche
+- Au clic sur “Ouvrir (VLC)”, l’app tente d’ouvrir VLC avec l’URL du flux.
+- Si VLC n’est pas trouvé, une invite vous demandera le chemin de `vlc.exe` (saisissez le chemin complet). Il sera réutilisé durant la session.
+- Option avancée: définir la variable d’environnement avant de lancer l’app desktop:
+
+  PowerShell (Windows):
+
+      $env:VLC_PATH="C:\\Program Files\\VideoLAN\\VLC\\vlc.exe"; npm run desktop
+
+Notes
+- Cette fonctionnalité n’est disponible qu’en mode desktop; en mode web, utilisez le bouton “M3U” et ouvrez le fichier avec VLC.
+
 Alternative ultra-simple (PWA locale):
 - Dans Edge/Chrome: Menu > Plus d’outils > Installer cette application (site) → crée un raccourci fenêtré.
 
