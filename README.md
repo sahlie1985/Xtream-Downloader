@@ -140,3 +140,28 @@ Conseils:
 - Préférez des images ≤ 1–2 Mo (compressez si besoin).
 - Utilisez un format PNG pour l’UI (ou WebP si vous préférez), à déposer dans `docs/`.
 - Si vous avez plusieurs vues, créez `docs/screenshots/` et ajoutez-les avec des légendes.
+
+Releases GitHub (installeur Windows)
+------------------------------------
+
+Deux façons d’ajouter un installeur à la rubrique “Releases” de GitHub:
+
+1) Manuel (simple et immédiat)
+- Sur un poste Windows, générez l’installeur: `npm run dist`
+- Cela produit un `.exe` dans `dist/`
+- Sur GitHub, créez une Release et joignez le fichier `.exe` comme asset
+
+2) Automatique via GitHub Actions (recommandé)
+- Un workflow est fourni: `.github/workflows/release.yml`
+- Publiez un tag versionné: par ex.
+
+      git tag v0.1.0
+      git push origin v0.1.0
+
+- L’action CI va:
+  - Construire l’installeur sous Windows runner
+  - Créer la Release et y attacher le `.exe`
+
+Notes
+- Sans signature de code, Windows peut afficher un avertissement à l’installation; c’est normal pour les builds non signés.
+- Personnalisez `productName` et `appId` dans `package.json` si besoin.
