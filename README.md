@@ -49,6 +49,36 @@ Ensuite ouvrez: http://localhost:5173
 Variables d’environnement:
 - `PORT` (par défaut 5173) : port d’écoute dans le conteneur.
 
+Application Windows (Electron)
+------------------------------
+
+Option “packagée” (EXE) basée sur Electron.
+
+1) Installer les dépendances (une fois):
+
+   npm install
+   npm install --save-dev electron electron-builder
+
+2) Lancer l’app desktop en dev:
+
+   npm run desktop
+
+3) Générer un installeur Windows (NSIS):
+
+   npm run dist
+
+Le binaire sera dans `dist/`. L’app embarque le serveur Express et ouvre l’interface sur `http://localhost:5173` dans une fenêtre native.
+
+Icônes & Favicons
+-----------------
+
+- Web favicon: `public/favicon.svg` (vectoriel) et `public/logo.svg` (utilisé dans l’en‑tête). Remplacez ces fichiers pour personnaliser le branding.
+- Icône Windows (Electron): placez une image `PNG` 512×512 dans `build/icon.png`.
+  - Un placeholder est généré automatiquement à l’installation (`postinstall`). Remplacez‑le par votre logo pour un rendu propre (installateur et raccourcis).
+
+Alternative ultra-simple (PWA locale):
+- Dans Edge/Chrome: Menu > Plus d’outils > Installer cette application (site) → crée un raccourci fenêtré.
+
 Utilisation
 -----------
 
@@ -71,3 +101,19 @@ Sécurité
 
 - Les identifiants sont envoyés au backend à chaque requête (pas de session côté serveur, simplification locale). Ne déployez pas tel quel sur Internet.
 - Évitez d’exposer ce serveur publiquement sans ajout d’authentification et de chiffrement (HTTPS, sessions, rate-limit, logs réduits).
+
+Captures d’écran
+-----------------
+
+Pour ajouter une capture d’écran au README sans exposer d’informations sensibles:
+
+1. Activez le « Mode capture » dans l’app (bouton en haut à droite) pour masquer les données sensibles, puis faites votre capture.
+2. Enregistrez-la dans ce dépôt, par exemple dans `docs/screenshot.png`.
+3. Référencez-la dans ce README via un lien relatif:
+
+   ![Xtream Viewer — Capture](docs/screenshot.png)
+
+Conseils:
+- Préférez des images ≤ 1–2 Mo (compressez si besoin).
+- Utilisez un format PNG pour l’UI (ou WebP si vous préférez), à déposer dans `docs/`.
+- Si vous avez plusieurs vues, créez `docs/screenshots/` et ajoutez-les avec des légendes.

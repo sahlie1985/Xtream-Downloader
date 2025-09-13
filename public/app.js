@@ -14,6 +14,9 @@ const state = {
   searchAll: false,
   currentItems: [],
   currentKind: "live", // live | movie | series (for render)
+  demo: false,
+  userInfoObj: null,
+  serverInfoObj: null,
 };
 
 function saveState() {
@@ -92,14 +95,41 @@ function formatMaybeDate(key, value) {
   return raw;
 }
 
+function maskValue(key, value) {
+  if (!state.demo) return value;
+  const k = String(key).toLowerCase();
+  const v = String(value ?? "");
+  // Generic masks
+  if (/(pass|token|secret)/.test(k)) return "••••••••";
+  if (/(user(name)?)/.test(k)) return "user-demo";
+  if (/url|host|domain/.test(k)) return "demo.example.net";
+  if (/ip/.test(k)) return "***.***.***.***";
+  if (/port/.test(k)) return "****";
+  if (/(created|exp|date|time|timestamp)/.test(k)) return formatMaybeDate(k, Date.now());
+  if (/auth|mac|hw|device/.test(k)) return "masked";
+  if (/active_cons|max_connections/.test(k)) return "1";
+  // Mask anything that looks like an URL or IP in the value
+  let out = v.replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g, "***.***.***.***");
+  out = out.replace(/https?:\/\/[^\s]+/g, "https://demo.example.net");
+  return out;
+}
+
 function renderKV(container, obj) {
   container.innerHTML = "";
   if (!obj) return;
   for (const [k, v] of Object.entries(obj)) {
     const d = document.createElement("div");
-    const formatted = formatMaybeDate(k, v);
-    d.textContent = `${k}: ${formatted}`;
-    if (formatted !== v) d.title = String(v);
+    const keySpan = document.createElement("span");
+    keySpan.className = "k";
+    keySpan.textContent = `${k}:`;
+    const valSpan = document.createElement("span");
+    valSpan.className = "v";
+    const formatted = formatMaybeDate(k, maskValue(k, v));
+    valSpan.textContent = `${formatted}`;
+    if (formatted !== v) valSpan.title = String(v);
+    if (state.demo && /pass|user|url|ip|port|auth|token|secret/i.test(k)) valSpan.classList.add("masked");
+    d.appendChild(keySpan);
+    d.appendChild(valSpan);
     container.appendChild(d);
   }
 }
@@ -120,8 +150,10 @@ async function connect() {
   }
   try {
     const { user_info, server_info } = await api("/api/account", creds());
-    renderKV(byId("userInfo"), user_info);
-    renderKV(byId("serverInfo"), server_info);
+    state.userInfoObj = user_info;
+    state.serverInfoObj = server_info;
+    renderKV(byId("userInfo"), state.userInfoObj);
+    renderKV(byId("serverInfo"), state.serverInfoObj);
     setVisible(byId("account"), true);
     setVisible(byId("tabs"), true);
     setVisible(byId("searchBar"), true);
@@ -343,6 +375,7 @@ byId("dlLive").onclick = () => downloadM3U("live");
 byId("dlVod").onclick = () => downloadM3U("vod");
 byId("dlEpg").onclick = () => downloadEPG();
 byId("clearBtn").onclick = () => clearStored();
+byId("toggleDemo").onclick = () => toggleDemo();
 
 document.querySelectorAll("nav button").forEach(btn => {
   btn.onclick = () => loadTab(btn.dataset.tab);
@@ -463,6 +496,18 @@ function clearStored() {
 // Auto-connect if we already have creds
 if (state.baseUrl && state.username && state.password) {
   connect();
+}
+
+function toggleDemo() {
+  state.demo = !state.demo;
+  const btn = byId("toggleDemo");
+  if (btn) {
+    btn.textContent = `Mode capture: ${state.demo ? 'ON' : 'OFF'}`;
+    btn.classList.toggle('active', state.demo);
+  }
+  // Re-render account blocks with masking
+  renderKV(byId("userInfo"), state.userInfoObj);
+  renderKV(byId("serverInfo"), state.serverInfoObj);
 }
 
 // Image modal logic

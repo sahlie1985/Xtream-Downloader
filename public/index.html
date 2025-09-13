@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Xtream Viewer</title>
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <header>
-      <h1>Xtream Viewer</h1>
+      <h1><img src="/logo.svg" alt="Xtream Viewer" class="brand" /> Xtream Viewer</h1>
       <div class="creds">
         <label>Serveur (ex: http://host:port)
           <input id="baseUrl" placeholder="http://host:port" />
@@ -27,6 +28,7 @@
         </label>
         <button id="connectBtn">Se connecter</button>
         <button id="clearBtn" class="btn-danger" title="Supprimer les données mémorisées (identifiants, préférences)">Effacer données</button>
+        <button id="toggleDemo" class="btn-secondary" title="Masquer les infos sensibles pour capture d’écran">Mode capture: OFF</button>
       </div>
     </header>
 
