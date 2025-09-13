@@ -73,8 +73,8 @@ Icônes & Favicons
 -----------------
 
 - Web favicon: `public/favicon.svg` (vectoriel) et `public/logo.svg` (utilisé dans l’en‑tête). Remplacez ces fichiers pour personnaliser le branding.
-- Icône Windows (Electron): placez une image `PNG` 512×512 dans `build/icon.png`.
-  - Un placeholder est généré automatiquement à l’installation (`postinstall`). Remplacez‑le par votre logo pour un rendu propre (installateur et raccourcis).
+- Icône Windows (Electron): par défaut l’installeur utilisera l’icône Electron.
+  - Pour personnaliser, fournissez une icône valide et mettez à jour la config `build.win.icon` (ICO recommandé) dans `package.json`.
 
 Lecture dans VLC (version desktop)
 ----------------------------------

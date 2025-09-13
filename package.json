@@ -2,14 +2,15 @@
   "name": "xtream-viewer",
   "version": "0.1.0",
   "private": true,
+  "description": "Viewer Xtream (Live/VOD/Series) avec M3U/EPG, mode desktop Electron",
+  "author": "Wajdi Hassen",
   "type": "module",
   "scripts": {
     "dev": "node server/index.js",
     "start": "NODE_ENV=production node server/index.js",
     "desktop": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder -w",
-    "postinstall": "node scripts/gen-icons.js"
+    "dist": "electron-builder -w"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -27,7 +28,6 @@
   "build": {
     "appId": "com.xtream.viewer",
     "productName": "Xtream Viewer",
-    "icon": "build/icon.png",
     "files": [
       "public/**",
       "server/**",
