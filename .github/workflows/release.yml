@@ -8,6 +8,8 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,13 +23,18 @@ jobs:
         run: npm ci
 
       - name: Build Windows installer (Electron)
-        run: npm run dist
+        run: npm run dist -- --publish never
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: xtream-viewer-windows
           path: dist/*.exe
+
+      - name: Show dist folder (debug)
+        if: always()
+        run: |
+          dir dist
 
       - name: Create GitHub Release and upload installer
         uses: softprops/action-gh-release@v2
@@ -36,4 +43,3 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
